@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<context:component-scan base-package="org.leo.jsm.api.*" />
+
+	<!-- for system configuration, common message and profile file -->
+	<util:properties id="message" location="classpath:message.properties" />
+    <context:property-placeholder location="classpath:redis.properties" />
+
+	<bean id="constants" class="org.leo.jsm.core.Constants">
+		<property name="messageMap" ref="message" />
+		<property name="openUrlPath">
+			<set>
+     			<value>register</value>
+     			<value>swagger.json</value>
+     		</set>
+		</property>
+	</bean>
+
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">  
+        <property name="maxIdle" value="${redis.maxIdle}" />  
+        <property name="maxTotal" value="${redis.maxTotal}" />  
+        <property name="maxWaitMillis" value="${redis.maxWaitMillis}" />  
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />  
+    </bean>  
+      
+    <bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="hostName" value="${redis.host}" /> 
+        <property name="port" value="${redis.port}" />
+        <property name="password" value="${redis.password}" />  
+        <property name="poolConfig" ref="poolConfig" />  
+    </bean>  
+      
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">  
+        <property name="connectionFactory"   ref="connectionFactory" />  
+    </bean>       
+
+	<!-- data source -->
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc/demorw</value>
+		</property>
+	</bean>
+	<!-- session factory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath:mappers/writable/*-mapper.xml" />
+	</bean>
+	<!-- scanner -->
+	<bean id="scannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="org.leo.jsm.api.mapper.writable" />
+		<property name="markerInterface" value="org.leo.jsm.core.BaseMapper" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+	
+	<!-- data source for read only -->
+	<bean id="dataSourceReadonly" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc/demor</value>
+		</property>
+	</bean>
+	<!-- session factory for read only -->
+	<bean id="sqlSessionFactoryReadonly" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSourceReadonly" />
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath:mappers/readonly/*-mapper.xml" />
+	</bean>
+	<!-- scanner for read only -->
+	<bean id="scannerConfigurerReadonly" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="org.leo.jsm.api.mapper.readonly" />
+		<property name="markerInterface" value="org.leo.jsm.core.BaseMapper" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryReadonly" />
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="txManager"/>
+	
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+</beans>

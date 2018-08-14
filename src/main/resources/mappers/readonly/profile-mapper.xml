@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.leo.jsm.api.mapper.readonly.ProfileReadonlyMapper">
+
+	<!-- 个人资料页: 得到用户资料页 -->
+ 	<select id="getProfileById" parameterType="java.lang.String" resultType="org.leo.jsm.api.entity.ProfileEntity" >
+ 	   <![CDATA[
+       SELECT
+            u.id id,
+     		u.name name
+       FROM user_info u
+       where u.id = #{userId}
+       ]]>
+    </select>
+</mapper>

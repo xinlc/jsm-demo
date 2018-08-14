@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 记得手动同步apache-tomcat\conf\Catalina\localhost\jsm-demo.xml -->
+
+<Context reloadable="true">
+
+    <Resource name="jdbc/demor" type="javax.sql.DataSource"
+              maxActive="550" maxIdle="80"
+              logAbandoned="true" removeAbandoned="true" removeAbandonedTimeout="60"
+              driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/demo?characterEncoding=UTF-8"
+              username="root" password=""/>
+
+    <Resource name="jdbc/demorw" type="javax.sql.DataSource"
+              maxActive="550" maxIdle="50"
+              logAbandoned="true" removeAbandoned="true" removeAbandonedTimeout="60"
+              driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:3306/demo?characterEncoding=UTF-8"
+              username="root" password=""/>
+
+</Context>
