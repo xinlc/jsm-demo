@@ -1,0 +1,17 @@
+# OSX
+#
+.DS_Store
+
+# vs code
+#
+.vscode
+.settings
+
+# Android/IntelliJ
+#
+.idea
+*.iml
+
+target/
+.classpath
+.project
